@@ -1,0 +1,160 @@
+version: "3.9"
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sys-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sys-network
+
+  mongodb:
+    image: mongo:7
+    container_name: sys-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sys-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: sys-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - sys-network
+
+  # ============================================================
+  # API GATEWAY
+  # ============================================================
+
+  gateway:
+    build: ./gateway
+    container_name: sys-gateway
+    ports:
+      - "${GATEWAY_PORT}:8000"
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - sys-network
+
+  # ============================================================
+  # MICROSERVICES
+  # ============================================================
+
+  pets-service:
+    build: ./services/pets
+    container_name: sys-pets
+    ports:
+      - "${PETS_SERVICE_PORT}:8001"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - sys-network
+
+  geo-service:
+    build: ./services/geolocation
+    container_name: sys-geo
+    ports:
+      - "${GEO_SERVICE_PORT}:8002"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sys-network
+
+  match-service:
+    build: ./services/match
+    container_name: sys-match
+    ports:
+      - "${MATCH_SERVICE_PORT}:8003"
+    env_file: .env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - sys-network
+
+  notifications-service:
+    build: ./services/notifications
+    container_name: sys-notifications
+    ports:
+      - "${NOTIFICATIONS_SERVICE_PORT}:8004"
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - sys-network
+
+  # ============================================================
+  # FRONTEND
+  # ============================================================
+
+  frontend:
+    build: ./frontend
+    container_name: sys-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - gateway
+    networks:
+      - sys-network
+
+volumes:
+  postgres_data:
+  mongo_data:
+
+networks:
+  sys-network:
+    driver: bridge
