@@ -25,23 +25,7 @@ services:
     networks:
       - sys-network
 
-  mongodb:
-    image: mongo:7
-    container_name: sys-mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - sys-network
+
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -115,7 +99,7 @@ services:
       - "${MATCH_SERVICE_PORT}:8003"
     env_file: .env
     depends_on:
-      mongodb:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -153,7 +137,7 @@ services:
 
 volumes:
   postgres_data:
-  mongo_data:
+
 
 networks:
   sys-network:

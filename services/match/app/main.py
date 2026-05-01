@@ -18,9 +18,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("match-service")
 
 
+from app.config import engine, Base
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🎯 Match Microservice starting...")
+    # Initialize DB schemas and tables
+    async with engine.begin() as conn:
+        # We need to make sure schema exists, although init-db.sql handles this usually.
+        await conn.run_sync(Base.metadata.create_all)
+        
     await publisher.connect()
     # Start RabbitMQ consumer in background
     asyncio.create_task(start_consumer())

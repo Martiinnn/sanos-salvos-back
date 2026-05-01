@@ -85,3 +85,43 @@ CREATE INDEX idx_locations_report ON geo_service.locations(report_id);
 -- ============================================================
 INSERT INTO auth_service.users (email, username, hashed_password, full_name, phone) VALUES
 ('demo@sanosysalvos.cl', 'demo', '$2b$12$LJ3m4ys5qOzXHEOMgS/VZeRTk.yD1FMCmXEKi6hGXn2UZJdK0WlEy', 'Usuario Demo', '+56912345678');
+
+-- ============================================================
+-- MATCH SERVICE TABLES
+-- ============================================================
+CREATE SCHEMA IF NOT EXISTS match_service;
+
+CREATE TABLE match_service.matches (
+    id UUID PRIMARY KEY,
+    report_lost_id INTEGER NOT NULL,
+    report_found_id INTEGER NOT NULL,
+    score DOUBLE PRECISION NOT NULL,
+    score_breakdown JSONB,
+    status VARCHAR(20) DEFAULT 'pendiente' CHECK (status IN ('pendiente', 'confirmado', 'descartado')),
+    pet_lost_name VARCHAR(100),
+    pet_found_name VARCHAR(100),
+    user_lost_id INTEGER,
+    user_found_id INTEGER,
+    notified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_matches_reports ON match_service.matches(report_lost_id, report_found_id);
+
+CREATE TABLE match_service.report_cache (
+    report_id INTEGER PRIMARY KEY,
+    report_type VARCHAR(20) NOT NULL,
+    pet_name VARCHAR(100),
+    species VARCHAR(50),
+    breed VARCHAR(100),
+    color VARCHAR(100),
+    size VARCHAR(20),
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    date_event DATE,
+    user_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_cache_type ON match_service.report_cache(report_type);
+
