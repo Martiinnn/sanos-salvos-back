@@ -1,4 +1,4 @@
-version: "3.9"
+
 
 services:
   # ============================================================
@@ -18,7 +18,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -123,13 +123,13 @@ services:
   # ============================================================
 
   frontend:
-    build: ./frontend
+    build: ../sanos-salvos-front
     container_name: sys-frontend
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
+      - ../sanos-salvos-front/src:/app/src
+      - ../sanos-salvos-front/public:/app/public
     depends_on:
       - gateway
     networks:
