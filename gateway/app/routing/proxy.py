@@ -102,13 +102,13 @@ async def proxy_geo(path: str, request: Request):
     return await proxy_request("geo", f"api/geo/{path}", request)
 
 
-@router.api_route("/api/matches/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+@router.api_route("/api/matches/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_matches(path: str, request: Request):
     """Proxy requests to the Match microservice."""
     return await proxy_request("matches", f"api/matches/{path}", request)
 
 
-@router.api_route("/api/notifications/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+@router.api_route("/api/notifications/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_notifications(path: str, request: Request):
     """Proxy requests to the Notifications microservice."""
     return await proxy_request("notifications", f"api/notifications/{path}", request)
