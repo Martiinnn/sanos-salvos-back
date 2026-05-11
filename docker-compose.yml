@@ -123,13 +123,13 @@ services:
   # ============================================================
 
   frontend:
-    build: ../sanos-salvos-front
+    build: ./frontend
     container_name: sys-frontend
     ports:
       - "5173:5173"
     volumes:
-      - ../sanos-salvos-front/src:/app/src
-      - ../sanos-salvos-front/public:/app/public
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
     depends_on:
       - gateway
     networks:
