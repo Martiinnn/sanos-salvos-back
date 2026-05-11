@@ -11,21 +11,24 @@ router = APIRouter(prefix="/api/notifications", tags=["Notificaciones"])
 
 
 @router.get("/")
-def list_notifications(limit: int = Query(50, ge=1, le=100)):
+def list_notifications(
+    user_id: str | None = Query(None, description="User id to filter notifications"),
+    limit: int = Query(50, ge=1, le=100),
+):
     """Get recent notifications."""
-    return NotificationService.get_notifications(limit=limit)
+    return NotificationService.get_notifications(user_id=user_id, limit=limit)
 
 
 @router.get("/unread-count")
-def unread_count():
+def unread_count(user_id: str | None = Query(None, description="User id to filter unread notifications")):
     """Get number of unread notifications."""
-    return {"count": NotificationService.get_unread_count()}
+    return {"count": NotificationService.get_unread_count(user_id=user_id)}
 
 
 @router.patch("/{notification_id}/read")
-def mark_read(notification_id: int):
+def mark_read(notification_id: int, user_id: str | None = Query(None, description="Owner user id")):
     """Mark a notification as read."""
-    success = NotificationService.mark_as_read(notification_id)
+    success = NotificationService.mark_as_read(notification_id, user_id=user_id)
     if success:
         return {"message": "Marcada como leída"}
     return {"message": "Notificación no encontrada"}
