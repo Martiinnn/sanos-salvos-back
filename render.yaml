@@ -1,0 +1,229 @@
+databases:
+  - name: sys-postgres
+    plan: free
+    databaseName: sanosysalvos_db
+    user: sanosysalvos
+
+services:
+  - type: pserv
+    name: sys-rabbitmq
+    runtime: image
+    image:
+      url: rabbitmq:3-management
+    plan: starter
+    envVars:
+      - key: RABBITMQ_DEFAULT_USER
+        value: guest
+      - key: RABBITMQ_DEFAULT_PASS
+        value: guest
+
+  - type: pserv
+    name: sys-pets
+    runtime: docker
+    dockerfilePath: ./services/pets/Dockerfile
+    dockerContext: ./services/pets
+    plan: starter
+    envVars:
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: sys-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: sys-postgres
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: sys-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: sys-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: sys-postgres
+          property: database
+      - key: RABBITMQ_HOST
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: host
+      - key: RABBITMQ_PORT
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: port
+      - key: RABBITMQ_USER
+        value: guest
+      - key: RABBITMQ_PASSWORD
+        value: guest
+
+  - type: pserv
+    name: sys-geo
+    runtime: docker
+    dockerfilePath: ./services/geolocation/Dockerfile
+    dockerContext: ./services/geolocation
+    plan: starter
+    envVars:
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: sys-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: sys-postgres
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: sys-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: sys-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: sys-postgres
+          property: database
+
+  - type: pserv
+    name: sys-match
+    runtime: docker
+    dockerfilePath: ./services/match/Dockerfile
+    dockerContext: ./services/match
+    plan: starter
+    envVars:
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: sys-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: sys-postgres
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: sys-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: sys-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: sys-postgres
+          property: database
+      - key: RABBITMQ_HOST
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: host
+      - key: RABBITMQ_PORT
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: port
+      - key: RABBITMQ_USER
+        value: guest
+      - key: RABBITMQ_PASSWORD
+        value: guest
+
+  - type: pserv
+    name: sys-notifications
+    runtime: docker
+    dockerfilePath: ./services/notifications/Dockerfile
+    dockerContext: ./services/notifications
+    plan: starter
+    envVars:
+      - key: RABBITMQ_HOST
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: host
+      - key: RABBITMQ_PORT
+        fromService:
+          name: sys-rabbitmq
+          type: pserv
+          property: port
+      - key: RABBITMQ_USER
+        value: guest
+      - key: RABBITMQ_PASSWORD
+        value: guest
+
+  - type: web
+    name: sys-gateway
+    runtime: docker
+    dockerfilePath: ./gateway/Dockerfile
+    dockerContext: ./gateway
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: sys-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: sys-postgres
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: sys-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: sys-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: sys-postgres
+          property: database
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: JWT_REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: PETS_SERVICE_HOST
+        fromService:
+          name: sys-pets
+          type: pserv
+          property: host
+      - key: PETS_SERVICE_PORT
+        fromService:
+          name: sys-pets
+          type: pserv
+          property: port
+      - key: GEO_SERVICE_HOST
+        fromService:
+          name: sys-geo
+          type: pserv
+          property: host
+      - key: GEO_SERVICE_PORT
+        fromService:
+          name: sys-geo
+          type: pserv
+          property: port
+      - key: MATCH_SERVICE_HOST
+        fromService:
+          name: sys-match
+          type: pserv
+          property: host
+      - key: MATCH_SERVICE_PORT
+        fromService:
+          name: sys-match
+          type: pserv
+          property: port
+      - key: NOTIFICATIONS_SERVICE_HOST
+        fromService:
+          name: sys-notifications
+          type: pserv
+          property: host
+      - key: NOTIFICATIONS_SERVICE_PORT
+        fromService:
+          name: sys-notifications
+          type: pserv
+          property: port
