@@ -20,7 +20,7 @@ geolocalizar reportes y gestionar coincidencias.
 Important:
 - RabbitMQ was removed.
 - Service-to-service communication is HTTP via Gateway routing/proxy.
-- Frontend auth is handled with Firebase Auth.
+- Frontend auth is handled with Firebase Auth (JWT auth in gateway was removed).
 
 ## API Entry Point
 
@@ -33,14 +33,9 @@ Main routed prefixes:
 - `/api/matches/*`
 - `/api/notifications/*`
 
-Gateway auth endpoints:
-- `/api/auth/register`
-- `/api/auth/login`
-- `/api/auth/me`
-
 ## Required Environment Variables
 
-### Shared (gateway and DB-backed services)
+### Shared (DB-backed services)
 
 ```env
 POSTGRES_HOST=
@@ -53,11 +48,6 @@ POSTGRES_PASSWORD=
 ### Gateway
 
 ```env
-JWT_SECRET_KEY=
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
-JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
-
 PETS_SERVICE_HOST=
 PETS_SERVICE_PORT=
 GEO_SERVICE_HOST=
