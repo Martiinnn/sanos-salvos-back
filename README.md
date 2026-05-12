@@ -1,64 +1,104 @@
-# 🐾 Sanos y Salvos
+# Sanos y Salvos - Backend
 
-Plataforma fullstack de microservicios para la localización y recuperación de mascotas perdidas.
+Backend de la plataforma Sanos y Salvos para reportar mascotas perdidas/encontradas,
+geolocalizar reportes y gestionar coincidencias.
 
-## Produccion
+## Production
 
-- Frontend: https://sanosysalvos-f9906.web.app/
+- Frontend (Firebase Hosting): https://sanosysalvos-f9906.web.app/
+- Backend (Render): API Gateway + microservicios FastAPI
 
+## Current Architecture
 
-## Arquitectura
+- API Gateway (`gateway`)
+- Pets Service (`services/pets`)
+- Geolocation Service (`services/geolocation`)
+- Match Service (`services/match`)
+- Notifications Service (`services/notifications`)
+- Shared Postgres database (Neon)
 
-| Componente | Tecnología | Puerto |
-|---|---|---|
-| **Frontend** | React 18 + Vite | 5173 |
-| **API Gateway** | FastAPI + JWT + Circuit Breaker | 8000 |
-| **Gestión de Mascotas** | FastAPI + PostgreSQL | 8001 |
-| **Geolocalización** | FastAPI + PostGIS | 8002 |
-| **Motor de Match** | FastAPI + MongoDB | 8003 |
-| **Notificaciones** | FastAPI + WebSocket | 8004 |
+Important:
+- RabbitMQ was removed.
+- Service-to-service communication is HTTP via Gateway routing/proxy.
+- Frontend auth is handled with Firebase Auth.
 
-| **Base de Datos** | PostgreSQL 16 + PostGIS | 5432 |
-| **Base NoSQL** | MongoDB 7 | 27017 |
+## API Entry Point
 
-## Patrones Implementados
+- Local: `http://localhost:8000`
+- Render: `https://<your-gateway>.onrender.com`
 
-- **API Gateway** — Punto de entrada centralizado con JWT
-- **Database per Service** — Cada servicio con su propia base de datos
-- **Repository Pattern** — Abstracción de acceso a datos
-- **Factory Method** — Creación de reportes y matches especializados
-- **Circuit Breaker** — Resiliencia ante fallos de servicios
-- **Synchronous Service Communication** - Comunicacion entre servicios por HTTP a traves del API Gateway
+Main routed prefixes:
+- `/api/pets/*`
+- `/api/geo/*`
+- `/api/matches/*`
+- `/api/notifications/*`
 
-## Requisitos
+Gateway auth endpoints:
+- `/api/auth/register`
+- `/api/auth/login`
+- `/api/auth/me`
 
-- Docker y Docker Compose
+## Required Environment Variables
 
-## Instalación y Ejecución
+### Shared (gateway and DB-backed services)
 
-```bash
-# Clonar repositorio
-git clone <repo-url>
-cd proyecto-fullstack
-
-# Levantar todo el stack
-docker-compose up --build
-
-# Acceder a la aplicación
-# Frontend:     http://localhost:5173
-# API Gateway:  http://localhost:8000/docs
-
+```env
+POSTGRES_HOST=
+POSTGRES_PORT=5432
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
 ```
 
-## Credenciales Demo
+### Gateway
 
-- **Email:** demo@sanosysalvos.cl
-- **Password:** demo123
+```env
+JWT_SECRET_KEY=
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 
-## Equipo
+PETS_SERVICE_HOST=
+PETS_SERVICE_PORT=
+GEO_SERVICE_HOST=
+GEO_SERVICE_PORT=
+MATCH_SERVICE_HOST=
+MATCH_SERVICE_PORT=
+NOTIFICATIONS_SERVICE_HOST=
+NOTIFICATIONS_SERVICE_PORT=
+```
 
-- Martín Leiva Andrades
-- Matías Flores Pastene
+## Local Run (without Docker)
 
-**Asignatura:** Desarrollo Full Stack III 001D  
-**Docente:** Eduardo Antonio Valenzuela Acevedo
+Run each service in its folder:
+
+```bash
+# Example
+cd gateway
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+Do the same for:
+- `services/pets` (port 8001)
+- `services/geolocation` (port 8002)
+- `services/match` (port 8003)
+- `services/notifications` (port 8004)
+
+## Database Setup
+
+Before creating reports, ensure schemas/tables exist in Postgres.
+At minimum, create schemas used by services:
+
+- `auth_service`
+- `pets_service`
+- `geo_service`
+- `match_service`
+- `notifications_service`
+
+Then execute your SQL initialization script (`init-db.sql`) against the same database.
+
+## Notes
+
+- Notifications service currently stores notifications in memory (demo mode).
+- Render free instances can sleep on inactivity and take time to wake up.
