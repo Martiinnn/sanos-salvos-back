@@ -26,24 +26,6 @@ services:
       - sys-network
 
 
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: sys-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    networks:
-      - sys-network
-
   # ============================================================
   # API GATEWAY
   # ============================================================
@@ -55,8 +37,6 @@ services:
       - "${GATEWAY_PORT}:8000"
     env_file: .env
     depends_on:
-      rabbitmq:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     networks:
@@ -74,8 +54,6 @@ services:
     env_file: .env
     depends_on:
       postgres:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     networks:
       - sys-network
@@ -101,8 +79,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - sys-network
 
@@ -112,9 +88,6 @@ services:
     ports:
       - "${NOTIFICATIONS_SERVICE_PORT}:8004"
     env_file: .env
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
     networks:
       - sys-network
 

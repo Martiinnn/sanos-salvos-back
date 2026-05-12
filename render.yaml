@@ -6,18 +6,6 @@ databases:
 
 services:
   - type: pserv
-    name: sys-rabbitmq
-    runtime: image
-    image:
-      url: rabbitmq:3-management
-    plan: starter
-    envVars:
-      - key: RABBITMQ_DEFAULT_USER
-        value: guest
-      - key: RABBITMQ_DEFAULT_PASS
-        value: guest
-
-  - type: pserv
     name: sys-pets
     runtime: docker
     dockerfilePath: ./services/pets/Dockerfile
@@ -44,20 +32,6 @@ services:
         fromDatabase:
           name: sys-postgres
           property: database
-      - key: RABBITMQ_HOST
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: host
-      - key: RABBITMQ_PORT
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: port
-      - key: RABBITMQ_USER
-        value: guest
-      - key: RABBITMQ_PASSWORD
-        value: guest
 
   - type: pserv
     name: sys-geo
@@ -114,20 +88,6 @@ services:
         fromDatabase:
           name: sys-postgres
           property: database
-      - key: RABBITMQ_HOST
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: host
-      - key: RABBITMQ_PORT
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: port
-      - key: RABBITMQ_USER
-        value: guest
-      - key: RABBITMQ_PASSWORD
-        value: guest
 
   - type: pserv
     name: sys-notifications
@@ -135,21 +95,7 @@ services:
     dockerfilePath: ./services/notifications/Dockerfile
     dockerContext: ./services/notifications
     plan: starter
-    envVars:
-      - key: RABBITMQ_HOST
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: host
-      - key: RABBITMQ_PORT
-        fromService:
-          name: sys-rabbitmq
-          type: pserv
-          property: port
-      - key: RABBITMQ_USER
-        value: guest
-      - key: RABBITMQ_PASSWORD
-        value: guest
+    envVars: []
 
   - type: web
     name: sys-gateway

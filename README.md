@@ -2,6 +2,11 @@
 
 Plataforma fullstack de microservicios para la localización y recuperación de mascotas perdidas.
 
+## Produccion
+
+- Frontend: https://sanosysalvos-f9906.web.app/
+
+
 ## Arquitectura
 
 | Componente | Tecnología | Puerto |
@@ -12,7 +17,7 @@ Plataforma fullstack de microservicios para la localización y recuperación de 
 | **Geolocalización** | FastAPI + PostGIS | 8002 |
 | **Motor de Match** | FastAPI + MongoDB | 8003 |
 | **Notificaciones** | FastAPI + WebSocket | 8004 |
-| **Message Broker** | RabbitMQ | 5672 / 15672 |
+
 | **Base de Datos** | PostgreSQL 16 + PostGIS | 5432 |
 | **Base NoSQL** | MongoDB 7 | 27017 |
 
@@ -23,7 +28,7 @@ Plataforma fullstack de microservicios para la localización y recuperación de 
 - **Repository Pattern** — Abstracción de acceso a datos
 - **Factory Method** — Creación de reportes y matches especializados
 - **Circuit Breaker** — Resiliencia ante fallos de servicios
-- **Event-Driven Architecture** — Comunicación asíncrona con RabbitMQ
+- **Synchronous Service Communication** - Comunicacion entre servicios por HTTP a traves del API Gateway
 
 ## Requisitos
 
@@ -42,7 +47,7 @@ docker-compose up --build
 # Acceder a la aplicación
 # Frontend:     http://localhost:5173
 # API Gateway:  http://localhost:8000/docs
-# RabbitMQ:     http://localhost:15672 (guest/guest)
+
 ```
 
 ## Credenciales Demo

@@ -1,5 +1,5 @@
 """
-Sanos y Salvos — Pets Microservice
+Sanos y Salvos - Pets Microservice
 Manages structured pet reports (lost & found).
 """
 
@@ -10,7 +10,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
-from app.events.publisher import publisher
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pets-service")
@@ -18,16 +17,14 @@ logger = logging.getLogger("pets-service")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🐾 Pets Microservice starting...")
-    await publisher.connect()
+    logger.info("Pets Microservice starting...")
     yield
-    await publisher.close()
-    logger.info("🛑 Pets Microservice shutting down...")
+    logger.info("Pets Microservice shutting down...")
 
 
 app = FastAPI(
-    title="Sanos y Salvos — Gestión de Mascotas",
-    description="Microservicio para registro y gestión de reportes de mascotas perdidas y encontradas",
+    title="Sanos y Salvos - Gestion de Mascotas",
+    description="Microservicio para registro y gestion de reportes de mascotas perdidas y encontradas",
     version="1.0.0",
     lifespan=lifespan,
 )

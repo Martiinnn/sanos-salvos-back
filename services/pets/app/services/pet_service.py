@@ -11,7 +11,6 @@ from app.models.pet import Pet
 from app.models.report import Report
 from app.repositories.pet_repository import PetRepository, ReportRepository
 from app.factories.report_factory import ReportFactory
-from app.events.publisher import publisher
 from app.schemas.report_schema import ReportCreate
 
 logger = logging.getLogger("pet_service")
@@ -30,7 +29,6 @@ class PetService:
         Create a new pet report (lost or found).
         1. Create the Pet entity
         2. Use ReportFactory to create the Report
-        3. Publish event to RabbitMQ for async processing
         """
         # 1. Create pet
         pet = Pet(
@@ -61,29 +59,6 @@ class PetService:
             notes=data.notes,
         )
         report = self.report_repo.create(report)
-
-        # 3. Publish event for async processing (match + notifications)
-        event_data = {
-            "report_id": report.id,
-            "pet_id": pet.id,
-            "report_type": report.report_type,
-            "user_id": user_id,
-            "species": pet.species,
-            "breed": pet.breed,
-            "color": pet.color,
-            "size": pet.size,
-            "latitude": report.latitude,
-            "longitude": report.longitude,
-            "date_event": str(report.date_event),
-            "pet_name": pet.name,
-            "contact_name": report.contact_name,
-            "contact_email": report.contact_email,
-        }
-
-        try:
-            await publisher.publish_pet_reported(event_data)
-        except Exception as e:
-            logger.warning(f"Failed to publish event (non-blocking): {e}")
 
         return report
 
