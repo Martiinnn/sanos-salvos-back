@@ -33,10 +33,10 @@ engine = create_engine(settings.DATABASE_URL)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 API Gateway starting...")
-    logger.info(f"  → Pets Service:          {settings.PETS_SERVICE_URL}")
-    logger.info(f"  → Geolocation Service:   {settings.GEO_SERVICE_URL}")
-    logger.info(f"  → Match Service:         {settings.MATCH_SERVICE_URL}")
-    logger.info(f"  → Notifications Service: {settings.NOTIFICATIONS_SERVICE_URL}")
+    logger.info(f"  → Pets Service:          {settings.pets_url}")
+    logger.info(f"  → Geolocation Service:   {settings.geo_url}")
+    logger.info(f"  → Match Service:         {settings.match_url}")
+    logger.info(f"  → Notifications Service: {settings.notifications_url}")
     yield
     logger.info("🛑 API Gateway shutting down...")
 

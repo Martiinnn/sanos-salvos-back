@@ -21,14 +21,39 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "sanosysalvos_db")
 
     # Service URLs
-    PETS_SERVICE_URL: str = os.getenv("PETS_SERVICE_URL", "http://localhost:8001")
-    GEO_SERVICE_URL: str = os.getenv("GEO_SERVICE_URL", "http://localhost:8002")
-    MATCH_SERVICE_URL: str = os.getenv("MATCH_SERVICE_URL", "http://localhost:8003")
-    NOTIFICATIONS_SERVICE_URL: str = os.getenv("NOTIFICATIONS_SERVICE_URL", "http://localhost:8004")
+    PETS_SERVICE_URL: str | None = os.getenv("PETS_SERVICE_URL")
+    GEO_SERVICE_URL: str | None = os.getenv("GEO_SERVICE_URL")
+    MATCH_SERVICE_URL: str | None = os.getenv("MATCH_SERVICE_URL")
+    NOTIFICATIONS_SERVICE_URL: str | None = os.getenv("NOTIFICATIONS_SERVICE_URL")
+
+    PETS_SERVICE_HOST: str = os.getenv("PETS_SERVICE_HOST", "localhost")
+    PETS_SERVICE_PORT: str = os.getenv("PETS_SERVICE_PORT", "8001")
+    GEO_SERVICE_HOST: str = os.getenv("GEO_SERVICE_HOST", "localhost")
+    GEO_SERVICE_PORT: str = os.getenv("GEO_SERVICE_PORT", "8002")
+    MATCH_SERVICE_HOST: str = os.getenv("MATCH_SERVICE_HOST", "localhost")
+    MATCH_SERVICE_PORT: str = os.getenv("MATCH_SERVICE_PORT", "8003")
+    NOTIFICATIONS_SERVICE_HOST: str = os.getenv("NOTIFICATIONS_SERVICE_HOST", "localhost")
+    NOTIFICATIONS_SERVICE_PORT: str = os.getenv("NOTIFICATIONS_SERVICE_PORT", "8004")
 
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
+    @property
+    def pets_url(self) -> str:
+        return self.PETS_SERVICE_URL or f"http://{self.PETS_SERVICE_HOST}:{self.PETS_SERVICE_PORT}"
+
+    @property
+    def geo_url(self) -> str:
+        return self.GEO_SERVICE_URL or f"http://{self.GEO_SERVICE_HOST}:{self.GEO_SERVICE_PORT}"
+
+    @property
+    def match_url(self) -> str:
+        return self.MATCH_SERVICE_URL or f"http://{self.MATCH_SERVICE_HOST}:{self.MATCH_SERVICE_PORT}"
+
+    @property
+    def notifications_url(self) -> str:
+        return self.NOTIFICATIONS_SERVICE_URL or f"http://{self.NOTIFICATIONS_SERVICE_HOST}:{self.NOTIFICATIONS_SERVICE_PORT}"
 
     class Config:
         env_file = ".env"

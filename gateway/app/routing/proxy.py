@@ -22,10 +22,10 @@ router = APIRouter()
 
 # Service routing map
 SERVICE_MAP = {
-    "pets": {"url": settings.PETS_SERVICE_URL, "breaker": pets_breaker},
-    "geo": {"url": settings.GEO_SERVICE_URL, "breaker": geo_breaker},
-    "matches": {"url": settings.MATCH_SERVICE_URL, "breaker": match_breaker},
-    "notifications": {"url": settings.NOTIFICATIONS_SERVICE_URL, "breaker": notifications_breaker},
+    "pets": {"url": settings.pets_url, "breaker": pets_breaker},
+    "geo": {"url": settings.geo_url, "breaker": geo_breaker},
+    "matches": {"url": settings.match_url, "breaker": match_breaker},
+    "notifications": {"url": settings.notifications_url, "breaker": notifications_breaker},
 }
 
 
