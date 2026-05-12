@@ -39,21 +39,56 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
+    @staticmethod
+    def _build_service_url(explicit_url: str | None, host: str, port: str) -> str:
+        if explicit_url:
+            return explicit_url.rstrip("/")
+
+        normalized_host = host.strip()
+        if normalized_host.startswith("http://") or normalized_host.startswith("https://"):
+            return normalized_host.rstrip("/")
+
+        # Render public domains must use HTTPS.
+        use_https = normalized_host.endswith(".onrender.com") or port == "443"
+        scheme = "https" if use_https else "http"
+
+        # Avoid malformed URLs like http://service.onrender.com:443
+        if (scheme == "https" and port == "443") or (scheme == "http" and port == "80"):
+            return f"{scheme}://{normalized_host}"
+
+        return f"{scheme}://{normalized_host}:{port}"
+
     @property
     def pets_url(self) -> str:
-        return self.PETS_SERVICE_URL or f"http://{self.PETS_SERVICE_HOST}:{self.PETS_SERVICE_PORT}"
+        return self._build_service_url(
+            self.PETS_SERVICE_URL,
+            self.PETS_SERVICE_HOST,
+            self.PETS_SERVICE_PORT,
+        )
 
     @property
     def geo_url(self) -> str:
-        return self.GEO_SERVICE_URL or f"http://{self.GEO_SERVICE_HOST}:{self.GEO_SERVICE_PORT}"
+        return self._build_service_url(
+            self.GEO_SERVICE_URL,
+            self.GEO_SERVICE_HOST,
+            self.GEO_SERVICE_PORT,
+        )
 
     @property
     def match_url(self) -> str:
-        return self.MATCH_SERVICE_URL or f"http://{self.MATCH_SERVICE_HOST}:{self.MATCH_SERVICE_PORT}"
+        return self._build_service_url(
+            self.MATCH_SERVICE_URL,
+            self.MATCH_SERVICE_HOST,
+            self.MATCH_SERVICE_PORT,
+        )
 
     @property
     def notifications_url(self) -> str:
-        return self.NOTIFICATIONS_SERVICE_URL or f"http://{self.NOTIFICATIONS_SERVICE_HOST}:{self.NOTIFICATIONS_SERVICE_PORT}"
+        return self._build_service_url(
+            self.NOTIFICATIONS_SERVICE_URL,
+            self.NOTIFICATIONS_SERVICE_HOST,
+            self.NOTIFICATIONS_SERVICE_PORT,
+        )
 
     class Config:
         env_file = ".env"
