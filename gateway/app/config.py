@@ -7,6 +7,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    FIREBASE_PROJECT_ID: str | None = os.getenv("FIREBASE_PROJECT_ID")
+    REQUIRE_FIREBASE_AUTH: bool = os.getenv("REQUIRE_FIREBASE_AUTH", "true").lower() == "true"
+
     PETS_SERVICE_URL: str | None = os.getenv("PETS_SERVICE_URL")
     GEO_SERVICE_URL: str | None = os.getenv("GEO_SERVICE_URL")
     MATCH_SERVICE_URL: str | None = os.getenv("MATCH_SERVICE_URL")

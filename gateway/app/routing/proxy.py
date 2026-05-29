@@ -9,6 +9,7 @@ import time
 from collections import defaultdict, deque
 from fastapi import APIRouter, Request, Response, HTTPException
 
+from app.auth.firebase import require_authenticated_user
 from app.config import settings
 from app.resilience.circuit_breaker import (
     pets_breaker,
@@ -67,6 +68,7 @@ async def proxy_request(
     service_name: str,
     path: str,
     request: Request,
+    extra_headers: dict[str, str] | None = None,
 ) -> Response:
     """
     Forward a request to the target microservice through its circuit breaker.
@@ -82,6 +84,8 @@ async def proxy_request(
     headers = dict(request.headers)
     headers.pop("host", None)
     headers.pop("content-length", None)
+    if extra_headers:
+        headers.update(extra_headers)
 
     # Read request body
     body = await request.body()
@@ -127,15 +131,20 @@ async def proxy_request(
 @router.api_route("/api/pets/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_pets(path: str, request: Request):
     """Proxy requests to the Pets microservice."""
+    auth_headers = None
     if request.method == "POST" and path.strip("/") == "reports":
+        auth_headers = require_authenticated_user(request)
         enforce_report_create_rate_limit(request)
-    return await proxy_request("pets", f"api/pets/{path}", request)
+    return await proxy_request("pets", f"api/pets/{path}", request, auth_headers)
 
 
 @router.api_route("/api/geo/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_geo(path: str, request: Request):
     """Proxy requests to the Geolocation microservice."""
-    return await proxy_request("geo", f"api/geo/{path}", request)
+    auth_headers = None
+    if request.method == "POST" and path.strip("/") == "locations":
+        auth_headers = require_authenticated_user(request)
+    return await proxy_request("geo", f"api/geo/{path}", request, auth_headers)
 
 
 @router.api_route("/api/matches/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])

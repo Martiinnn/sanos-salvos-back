@@ -125,6 +125,10 @@ services:
         fromDatabase:
           name: sys-postgres
           property: database
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: REQUIRE_FIREBASE_AUTH
+        value: "true"
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: JWT_ALGORITHM

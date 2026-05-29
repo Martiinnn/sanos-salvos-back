@@ -15,12 +15,17 @@ router = APIRouter(prefix="/api/pets", tags=["Mascotas"])
 
 
 def _get_user_id(request: Request) -> int:
-    """Extract user_id from JWT payload passed by the gateway."""
-    auth = request.headers.get("Authorization", "")
-    # In a real scenario the gateway validates the token; here we trust internal network
-    # For demo purposes, accept a user_id header or default to 1
-    user_id = request.headers.get("X-User-Id", "1")
-    return int(user_id)
+    """Extract the authenticated user id passed by the gateway."""
+    user_id = request.headers.get("X-User-Id")
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Debes iniciar sesion o registrarte para realizar esta accion.",
+        )
+    try:
+        return int(user_id)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Usuario autenticado invalido.")
 
 
 @router.get("/stats")

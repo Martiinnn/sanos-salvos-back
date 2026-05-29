@@ -48,6 +48,8 @@ POSTGRES_PASSWORD=
 ### Gateway
 
 ```env
+FIREBASE_PROJECT_ID=
+REQUIRE_FIREBASE_AUTH=true
 PETS_SERVICE_HOST=
 PETS_SERVICE_PORT=
 GEO_SERVICE_HOST=
@@ -57,6 +59,9 @@ MATCH_SERVICE_PORT=
 NOTIFICATIONS_SERVICE_HOST=
 NOTIFICATIONS_SERVICE_PORT=
 ```
+
+`FIREBASE_PROJECT_ID` debe coincidir con el proyecto configurado en el frontend
+(`VITE_FIREBASE_PROJECT_ID`) para validar los tokens de Firebase al crear reportes.
 
 ## Local Run (without Docker)
 
