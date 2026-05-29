@@ -5,6 +5,8 @@ Routes incoming requests to the appropriate microservice through Circuit Breaker
 
 import httpx
 import logging
+import time
+from collections import defaultdict, deque
 from fastapi import APIRouter, Request, Response, HTTPException
 
 from app.config import settings
@@ -20,6 +22,10 @@ logger = logging.getLogger("proxy")
 
 router = APIRouter()
 
+REPORT_CREATE_LIMIT = 5
+REPORT_CREATE_WINDOW_SECONDS = 10 * 60
+report_create_attempts = defaultdict(deque)
+
 # Service routing map
 SERVICE_MAP = {
     "pets": {"url": settings.pets_url, "breaker": pets_breaker},
@@ -27,6 +33,34 @@ SERVICE_MAP = {
     "matches": {"url": settings.match_url, "breaker": match_breaker},
     "notifications": {"url": settings.notifications_url, "breaker": notifications_breaker},
 }
+
+
+def get_client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+
+def enforce_report_create_rate_limit(request: Request) -> None:
+    client_ip = get_client_ip(request)
+    now = time.monotonic()
+    attempts = report_create_attempts[client_ip]
+
+    while attempts and now - attempts[0] > REPORT_CREATE_WINDOW_SECONDS:
+        attempts.popleft()
+
+    if len(attempts) >= REPORT_CREATE_LIMIT:
+        retry_after = int(REPORT_CREATE_WINDOW_SECONDS - (now - attempts[0]))
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados reportes creados. Intenta nuevamente en unos minutos.",
+            headers={"Retry-After": str(max(retry_after, 1))},
+        )
+
+    attempts.append(now)
 
 
 async def proxy_request(
@@ -93,6 +127,8 @@ async def proxy_request(
 @router.api_route("/api/pets/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_pets(path: str, request: Request):
     """Proxy requests to the Pets microservice."""
+    if request.method == "POST" and path.strip("/") == "reports":
+        enforce_report_create_rate_limit(request)
     return await proxy_request("pets", f"api/pets/{path}", request)
 
 
