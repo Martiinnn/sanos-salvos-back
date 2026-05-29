@@ -33,9 +33,12 @@ def _stable_numeric_user_id(firebase_uid: str) -> int:
     return int(digest[:12], 16) % 2_147_483_647 or 1
 
 
-def _verify_with_google_auth(token: str) -> dict[str, Any] | None:
+def _verify_with_google_auth(token: str) -> dict[str, Any]:
     if not settings.FIREBASE_PROJECT_ID:
-        return None
+        raise HTTPException(
+            status_code=500,
+            detail="Falta configurar FIREBASE_PROJECT_ID. No se puede validar la autenticacion.",
+        )
 
     try:
         from google.auth.transport import requests as google_requests
@@ -62,7 +65,7 @@ def require_authenticated_user(request: Request) -> dict[str, str]:
     token = _extract_bearer_token(request)
 
     if settings.REQUIRE_FIREBASE_AUTH:
-        claims = _verify_with_google_auth(token) or _decode_unverified_payload(token)
+        claims = _verify_with_google_auth(token)
     else:
         claims = _decode_unverified_payload(token)
 
