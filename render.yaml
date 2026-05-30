@@ -126,7 +126,7 @@ services:
           name: sys-postgres
           property: database
       - key: FIREBASE_PROJECT_ID
-        sync: false
+        value: sanosysalvos-f9906
       - key: REQUIRE_FIREBASE_AUTH
         value: "true"
       - key: JWT_SECRET_KEY
