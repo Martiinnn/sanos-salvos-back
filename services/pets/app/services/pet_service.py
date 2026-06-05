@@ -77,6 +77,16 @@ class PetService:
     def get_user_reports(self, user_id: int) -> List[Report]:
         return self.report_repo.get_by_user(user_id)
 
+    def get_user_report_summary(self, user_id: int) -> dict:
+        reports = self.get_user_reports(user_id)
+        return {
+            "total": len(reports),
+            "perdidos": sum(1 for report in reports if report.report_type == "perdido"),
+            "encontrados": sum(1 for report in reports if report.report_type == "encontrado"),
+            "activos": sum(1 for report in reports if report.status == "activo"),
+            "resueltos": sum(1 for report in reports if report.status == "resuelto"),
+        }
+
     def update_report_status(self, report_id: int, status: str) -> Optional[Report]:
         return self.report_repo.update_status(report_id, status)
 

@@ -82,6 +82,13 @@ def get_my_reports(request: Request, db: Session = Depends(get_db)):
     return service.get_user_reports(user_id)
 
 
+@router.get("/my-reports/summary")
+def get_my_reports_summary(request: Request, db: Session = Depends(get_db)):
+    user_id = _get_user_id(request)
+    service = PetService(db)
+    return service.get_user_report_summary(user_id)
+
+
 @router.patch("/reports/{report_id}/status")
 def update_report_status(
     report_id: int,
