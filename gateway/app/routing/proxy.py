@@ -137,6 +137,8 @@ async def proxy_pets(path: str, request: Request):
         enforce_report_create_rate_limit(request)
     elif request.method == "GET" and path.strip("/").startswith("my-reports"):
         auth_headers = require_authenticated_user(request)
+    elif request.method == "DELETE" and path.startswith("reports/"):
+        auth_headers = require_authenticated_user(request)
     return await proxy_request("pets", f"api/pets/{path}", request, auth_headers)
 
 
