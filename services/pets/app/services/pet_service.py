@@ -90,6 +90,9 @@ class PetService:
     def update_report_status(self, report_id: int, status: str) -> Optional[Report]:
         return self.report_repo.update_status(report_id, status)
 
+    def delete_report(self, report_id: int) -> bool:
+        return self.report_repo.delete(report_id)
+
     def get_stats(self) -> dict:
         counts = self.report_repo.count_by_type()
         return {

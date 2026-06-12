@@ -94,6 +94,14 @@ class ReportRepository:
         self.db.refresh(report)
         return report
 
+    def delete(self, report_id: int) -> bool:
+        report = self.get_by_id(report_id)
+        if not report:
+            return False
+        self.db.delete(report)
+        self.db.commit()
+        return True
+
     def count_by_type(self) -> dict:
         """Get report counts by type."""
         from sqlalchemy import func

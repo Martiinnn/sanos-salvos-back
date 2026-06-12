@@ -101,3 +101,25 @@ def update_report_status(
     if not report:
         raise HTTPException(status_code=404, detail="Reporte no encontrado")
     return {"message": "Estado actualizado", "status": report.status}
+
+
+@router.delete("/reports/{report_id}", status_code=204)
+def delete_report(
+    report_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Delete a specific report."""
+    user_id = _get_user_id(request)
+    service = PetService(db)
+
+    report = service.get_report(report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+    if report.user_id != user_id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para borrar este reporte")
+
+    success = service.delete_report(report_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+    return None
