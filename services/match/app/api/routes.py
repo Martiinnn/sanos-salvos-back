@@ -20,6 +20,14 @@ async def list_matches(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, 
     return await MatchRepository.get_all(skip, limit)
 
 
+@router.post("/run")
+async def run_match_engine(report_data: dict):
+    """Trigger the match engine for a specific report."""
+    from app.services.match_engine import MatchEngine
+    matches = await MatchEngine.process_new_report(report_data)
+    return {"message": "Motor de coincidencia ejecutado", "matches_found": len(matches), "matches": matches}
+
+
 @router.get("/{match_id}")
 async def get_match(match_id: str):
     """Get a specific match by ID."""
