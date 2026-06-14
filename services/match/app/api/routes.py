@@ -42,3 +42,11 @@ async def update_match_status(match_id: str, data: StatusUpdate):
     if not success:
         raise HTTPException(status_code=404, detail="Coincidencia no encontrada")
     return {"message": "Estado actualizado", "status": data.status}
+
+
+@router.post("/run")
+async def run_match_engine(report_data: dict):
+    """Trigger the match engine for a specific report."""
+    from app.services.match_engine import MatchEngine
+    matches = await MatchEngine.process_new_report(report_data)
+    return {"message": "Motor de coincidencia ejecutado", "matches_found": len(matches), "matches": matches}
