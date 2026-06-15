@@ -37,6 +37,11 @@ class ReportBase(BaseModel):
     contact_email: Optional[str] = None
     notes: Optional[str] = None
 
+
+class ReportCreate(ReportBase):
+    """Create a report with pet data included."""
+    pet: PetCreate
+
     @field_validator("report_type")
     @classmethod
     def validate_report_type(cls, value: str) -> str:
@@ -114,11 +119,6 @@ class ReportBase(BaseModel):
         if value and len(value) > 500:
             raise ValueError("Las notas no pueden superar 500 caracteres")
         return value
-
-
-class ReportCreate(ReportBase):
-    """Create a report with pet data included."""
-    pet: PetCreate
 
     @model_validator(mode="after")
     def require_create_fields(self):

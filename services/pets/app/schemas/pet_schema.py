@@ -39,6 +39,8 @@ class PetBase(BaseModel):
     photo_url: Optional[str] = None
     distinctive_features: Optional[str] = None
 
+
+class PetCreate(PetBase):
     @field_validator("name")
     @classmethod
     def validate_name(cls, value: Optional[str]) -> Optional[str]:
@@ -121,8 +123,6 @@ class PetBase(BaseModel):
             raise ValueError("Las caracteristicas distintivas no pueden superar 300 caracteres")
         return value
 
-
-class PetCreate(PetBase):
     @model_validator(mode="after")
     def require_create_fields(self):
         if not self.name:
