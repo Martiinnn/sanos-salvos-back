@@ -23,7 +23,7 @@ logger = logging.getLogger("proxy")
 
 router = APIRouter()
 
-REPORT_CREATE_LIMIT = 5
+REPORT_CREATE_LIMIT = 50
 REPORT_CREATE_WINDOW_SECONDS = 10 * 60
 report_create_attempts = defaultdict(deque)
 
