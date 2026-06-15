@@ -81,7 +81,7 @@ class PetCreate(PetBase):
     @classmethod
     def validate_size(cls, value: str) -> str:
         value = value.strip().lower()
-        if value not in {"pequeño", "mediano", "grande"}:
+        if value not in {"pequeño", "pequeno", "mediano", "grande"}:
             raise ValueError("El tamano debe ser pequeño, mediano o grande")
         return value
 
@@ -91,8 +91,8 @@ class PetCreate(PetBase):
         value = _clean(value)
         if value is None:
             return value
-        if len(value) > 40 or _letter_count(value) < 3:
-            raise ValueError("La edad aproximada debe incluir texto")
+        if not value.isdigit() and not value.isnumeric():
+            raise ValueError("La edad debe contener solo numeros")
         return value
 
     @field_validator("description")
@@ -101,8 +101,8 @@ class PetCreate(PetBase):
         value = _clean(value)
         if value is None:
             return value
-        if len(value) < 20 or len(value) > 500 or _word_count(value) < 3 or _letter_count(value) < 10:
-            raise ValueError("La descripcion debe tener al menos 20 caracteres y 3 palabras")
+        if len(value) < 5 or len(value) > 500:
+            raise ValueError("La descripcion debe tener entre 5 y 500 caracteres")
         return value
 
     @field_validator("photo_url")
