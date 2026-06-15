@@ -12,6 +12,12 @@ router.get('/', (req, res) => {
   res.json(results);
 });
 
+router.post('/', async (req, res) => {
+  const matchData = req.body;
+  const created = await NotificationService.createNotification(matchData);
+  res.status(201).json(created);
+});
+
 router.get('/unread-count', (req, res) => {
   const userId = req.query.user_id || null;
   res.json({ count: NotificationService.getUnreadCount(userId) });

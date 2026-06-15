@@ -88,6 +88,16 @@ services:
         fromDatabase:
           name: sys-postgres
           property: database
+      - key: NOTIFICATIONS_SERVICE_HOST
+        fromService:
+          name: sys-notifications
+          type: pserv
+          property: host
+      - key: NOTIFICATIONS_SERVICE_PORT
+        fromService:
+          name: sys-notifications
+          type: pserv
+          property: port
 
   - type: pserv
     name: sys-notifications
