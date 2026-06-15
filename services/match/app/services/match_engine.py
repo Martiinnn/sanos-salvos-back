@@ -12,8 +12,11 @@ Scoring Weights:
 
 import math
 import logging
+import os
 from datetime import datetime
 from typing import List
+
+import httpx
 
 from app.repositories.match_repository import MatchRepository
 from app.factories.match_factory import MatchFactory
@@ -22,6 +25,10 @@ logger = logging.getLogger("match_engine")
 
 # Minimum score threshold to consider a match
 MATCH_THRESHOLD = 40.0
+
+_NOTIF_HOST = os.getenv("NOTIFICATIONS_SERVICE_HOST", "localhost")
+_NOTIF_PORT = os.getenv("NOTIFICATIONS_SERVICE_PORT", "8004")
+NOTIFICATIONS_URL = f"http://{_NOTIF_HOST}:{_NOTIF_PORT}/api/notifications"
 
 
 class MatchEngine:
@@ -255,5 +262,16 @@ class MatchEngine:
                     f"🎯 Match found! Score: {score:.1f}% — "
                     f"Lost #{lost_report['report_id']} ↔ Found #{found_report['report_id']}"
                 )
+
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                for m in matches_found:
+                    payload = {
+                        k: (v.isoformat() if hasattr(v, "isoformat") else v)
+                        for k, v in m.items()
+                    }
+                    await client.post(_NOTIF_URL, json=payload)
+        except Exception:
+            logger.warning("Failed to send match notifications")
 
         return matches_found
