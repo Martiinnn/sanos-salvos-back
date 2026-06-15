@@ -154,7 +154,10 @@ async def proxy_geo(path: str, request: Request):
 @router.api_route("/api/matches/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy_matches(path: str, request: Request):
     """Proxy requests to the Match microservice."""
-    return await proxy_request("matches", f"api/matches/{path}", request)
+    auth_headers = None
+    if request.method == "GET" and (path.strip("/") == "" or path.startswith("report/")):
+        auth_headers = require_authenticated_user(request)
+    return await proxy_request("matches", f"api/matches/{path}", request, auth_headers)
 
 
 @router.api_route("/api/notifications/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
