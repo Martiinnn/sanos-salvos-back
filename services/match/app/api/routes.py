@@ -2,7 +2,7 @@
 Sanos y Salvos — Match API Routes
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel
 
 from app.repositories.match_repository import MatchRepository
@@ -15,8 +15,10 @@ class StatusUpdate(BaseModel):
 
 
 @router.get("/")
-async def list_matches(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100), user_id: int | None = None):
+async def list_matches(request: Request, skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100)):
     """List all match results."""
+    user_id_str = request.headers.get("X-User-Id")
+    user_id = int(user_id_str) if user_id_str else None
     return await MatchRepository.get_all(skip, limit, user_id)
 
 
