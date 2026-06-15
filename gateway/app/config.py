@@ -26,7 +26,7 @@ class Settings(BaseSettings):
 
     @staticmethod
     def _build_service_url(explicit_url: str | None, host: str, port: str) -> str:
-        if explicit_url:
+        if explicit_url and "sys-gateway" not in explicit_url:
             return explicit_url.rstrip("/")
 
         normalized_host = host.strip()
