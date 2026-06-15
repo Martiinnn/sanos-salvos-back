@@ -1,6 +1,7 @@
 """
 Sanos y Salvos - Match Microservice
 Motor de coincidencias con algoritmo de scoring ponderado.
+(Force rebuild)
 """
 
 import logging
