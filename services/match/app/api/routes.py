@@ -15,9 +15,9 @@ class StatusUpdate(BaseModel):
 
 
 @router.get("/")
-async def list_matches(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100)):
+async def list_matches(skip: int = Query(0, ge=0), limit: int = Query(50, ge=1, le=100), user_id: int | None = None):
     """List all match results."""
-    return await MatchRepository.get_all(skip, limit)
+    return await MatchRepository.get_all(skip, limit, user_id)
 
 
 @router.post("/run")
