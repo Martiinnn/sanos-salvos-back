@@ -54,9 +54,17 @@ class MatchRepository:
             return None
 
     @staticmethod
-    async def get_all(skip: int = 0, limit: int = 50) -> List[dict]:
+    async def get_all(skip: int = 0, limit: int = 50, user_id: Optional[int] = None) -> List[dict]:
         async with AsyncSessionLocal() as session:
-            stmt = select(MatchDB).order_by(desc(MatchDB.created_at)).offset(skip).limit(limit)
+            stmt = select(MatchDB)
+            if user_id is not None:
+                stmt = stmt.where(
+                    or_(
+                        MatchDB.user_lost_id == user_id,
+                        MatchDB.user_found_id == user_id
+                    )
+                )
+            stmt = stmt.order_by(desc(MatchDB.created_at)).offset(skip).limit(limit)
             result = await session.execute(stmt)
             matches = result.scalars().all()
             
